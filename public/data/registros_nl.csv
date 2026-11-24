@@ -1,0 +1,10 @@
+modulo,nombre,documento,colegio,grupo,asis_unica,total_asis,grupo_activo,grupo_nl,asistencias_mes
+conteo,ESTUDIANTE DEMO UNO,1000000001,Colegio La Alameda,GRUPO 101,2026-05-10,4,,,
+conteo,ESTUDIANTE DEMO DOS,1000000002,Colegio La Alameda,GRUPO 202,2026-05-12,2,,,
+conteo,ESTUDIANTE DEMO TRES,1000000003,Colegio El Portal,GRUPO 301,2026-05-04,6,,,
+conteo,ESTUDIANTE DEMO CUATRO,1000000004,Colegio El Portal,GRUPO 402,2026-05-18,1,,,
+conteo,ESTUDIANTE DEMO CINCO,1000000005,Colegio Los Cerros,GRUPO 501,2026-05-22,3,,,
+duplicados,ESTUDIANTE DEMO UNO,1000000001,Colegio La Alameda,,,,GRUPO 101,GRUPO 102 (NL),
+duplicados,ESTUDIANTE DEMO TRES,1000000003,Colegio El Portal,,,,GRUPO 301,GRUPO 303 (NL),
+busqueda,ESTUDIANTE DEMO UNO,1000000001,Colegio La Alameda,GRUPO 101,,,,,4
+busqueda,ESTUDIANTE DEMO TRES,1000000003,Colegio El Portal,GRUPO 301,,,,,6
