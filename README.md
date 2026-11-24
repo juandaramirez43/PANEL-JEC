@@ -4,14 +4,6 @@
 
 **Dashboard de gestión para programas educativos: consolida asistencia, planeaciones, refrigerios y docentes a partir de fuentes de datos (CSV / Google Sheets / Google Drive).**
 
-[![JavaScript](https://img.shields.io/badge/JavaScript-ES2020-F7DF1E?logo=javascript&logoColor=black)](https://developer.mozilla.org/es/docs/Web/JavaScript)
-[![HTML5](https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white)](https://developer.mozilla.org/es/docs/Glossary/HTML5)
-[![CSS3](https://img.shields.io/badge/CSS3-1572B6?logo=css3&logoColor=white)](https://developer.mozilla.org/es/docs/Web/CSS)
-[![CSV](https://img.shields.io/badge/Datos-CSV-217346?logo=database&logoColor=white)](#base-de-datos-de-demostraci%C3%B3n-csv)
-[![Google Apps Script](https://img.shields.io/badge/Google_Apps_Script-Backend-4285F4?logo=google&logoColor=white)](https://developers.google.com/apps-script)
-
-[Captura del dashboard](docs/screenshots/01-dashboard.png)
-
 </div>
 
 ---
@@ -44,34 +36,12 @@ La aplicación funciona con **una base de datos de demostración en archivos CSV
 - Pantalla de configuración protegida por contraseña (modo administrador).
 - **Modo demo** alimentado por las tablas CSV, para explorar la interfaz sin conectar servicios.
 
-## Arquitectura
-
-```mermaid
-flowchart LR
-    subgraph cliente["Navegador"]
-        UI["SPA JavaScript + HTML + CSS<br/>Dashboard y reportes"]
-        DB["Capa de datos (dataService)<br/>Parser CSV propio"]
-    end
-
-    subgraph datos["Datos"]
-        CSV[("public/data/*.csv<br/>Base de datos de demostración<br/>(5 tablas planas)")]
-        GAS["Google Apps Script<br/>Web App (doPost / doGet)<br/>google-apps-script/Code.gs"]
-        GWS["Google Sheets + Drive<br/>(producción)"]
-    end
-
-    DB -- "fetch + parse de tablas CSV<br/>(modo demo)" --> CSV
-    UI -- "POST JSON (Content-Type: text/plain<br/>para evitar preflight CORS)" --> GAS
-    GAS -- "DriveApp / SpreadsheetApp" --> GWS
-    GAS -- "JSON: reportes, colegios,<br/>progreso por lotes" --> UI
-```
-
-**Decisiones técnicas destacadas**
+## Decisiones técnicas destacadas
 
 | Reto | Solución implementada |
 | --- | --- |
 | Separar los datos del código | Los registros de la demo viven en **tablas CSV** (`public/data/`); el código solo contiene lógica de negocio y las lee con un parser CSV propio |
 | Apps Script tiene un límite de ~6 minutos por ejecución | Los colegios se procesan en **lotes** (`fetchReportDataInBatches`), con reintentos y consolidación en el cliente |
-| CORS con Apps Script | `POST` con `Content-Type: text/plain;charset=utf-8` para que la petición sea *simple request* y evite el preflight `OPTIONS` |
 | Peticiones largas que se quedan colgadas | `AbortController` + timeout configurable (por defecto 360 s) y cancelación manual desde la UI |
 | Visibilidad del avance en sincronizaciones largas | Servicio de progreso con *polling* (`getProgress`) y barra de avance con colegios procesados |
 | Respaldo de cientos de archivos en Drive | Copias por lotes con **triggers** que reanudan el trabajo pendiente entre ejecuciones |
@@ -92,8 +62,8 @@ La "base de datos" del modo demo es un pequeño modelo relacional en archivos CS
 
 La conexión se hace en `src/dataService.ts`:
 
-1. **`parseCSV()`**: parser de CSV escrito desde cero en JavaScript puro (soporta comillas, comas y saltos de línea escapados) — no depende de ninguna librería.
-2. **`loadDemoDatabase()`**: descarga las 5 tablas con `fetch()`, las convierte en objetos JavaScript, normaliza los tipos (números, nulos) y **cachea** el resultado para que cada tabla se descargue una sola vez por sesión.
+1. **`parseCSV()`**: parser de CSV escrito desde cero (soporta comillas, comas y saltos de línea escapados), sin depender de ninguna librería.
+2. **`loadDemoDatabase()`**: descarga las 5 tablas con `fetch()`, las convierte en objetos, normaliza los tipos (números, nulos) y **cachea** el resultado para que cada tabla se descargue una sola vez por sesión.
 3. Los componentes consumen `loadDemoDatabase()` igual que consumirían el backend real: `generateMockReportData()` arma los reportes del dashboard a partir de las tablas, y los paneles de análisis leen `registros_nl.csv`.
 
 En producción, la misma interfaz la cumple el backend de Google Apps Script (`services/apiService.ts`), que lee Google Sheets y Google Drive: cambiar de fuente de datos no exige tocar la interfaz.
@@ -127,15 +97,7 @@ En producción, la misma interfaz la cumple el backend de Google Apps Script (`s
 
 ## Stack técnico
 
-| Capa | Tecnología |
-| --- | --- |
-| Lenguajes base | **JavaScript, HTML5, CSS3** |
-| Datos | **CSV** (base de datos demo), Google Sheets y Google Drive en producción |
-| Backend | Google Apps Script (Web App, JSON API) |
-| Exportación | Excel (.xlsx) con SheetJS y CSV nativo |
-| Despliegue | Netlify (configuración incluida en `netlify.toml`) |
-
-Como librerías de apoyo, la interfaz usa React (para organizar los componentes reutilizables) y Tailwind CSS (para los estilos), sobre un build con Vite; toda la lógica de datos, parsing y negocio está escrita en JavaScript.
+TypeScript · React · Vite · Tailwind CSS · Google Apps Script (backend) · Google Sheets y Drive (datos en producción) · CSV (datos de la demo) · SheetJS (exportación a Excel) · Netlify (despliegue).
 
 ## Ejecución local (modo demo)
 
@@ -143,8 +105,8 @@ Requisitos: Node.js 18+ y npm.
 
 ```bash
 # 1. Clonar el repositorio
-git clone https://github.com/juandaramirez43/JEC-COLSUBSIDIO.git
-cd JEC-COLSUBSIDIO
+git clone https://github.com/juandaramirez43/PANEL-JEC.git
+cd PANEL-JEC
 
 # 2. Instalar dependencias
 npm install
@@ -188,16 +150,18 @@ npm run build   # genera la carpeta dist/ (incluye las tablas CSV de public/data
 
 ## Autor
 
-Desarrollado por [Juan David Ramírez](https://github.com/juandaramirez43) — en formación, enfocado en **análisis de datos e ingeniería de datos**: modelado de datos, procesamiento por lotes, calidad y validación de registros, y automatización de reportes con Google Workspace.
+Desarrollado por [Juan David Ramírez](https://github.com/juandaramirez43), ingeniero civil en Bogotá, Colombia, enfocado en **análisis de datos e ingeniería de datos**: modelado de datos, procesamiento por lotes, calidad y validación de registros, y automatización de reportes con Google Workspace.
+
+El panel se desarrolló principalmente con **Google AI Studio y Gemini**, que asistieron en la escritura del código.
 
 ---
 
 ## English summary
 
-**Panel JEC** is an operations dashboard for an educational program run by a Colombian nonprofit organization. It replaces manual spreadsheet reviews with a single JavaScript dashboard that consolidates attendance, lesson-planning, snacks and teacher data stored across Google Sheets files in Google Drive, filtered by month and school.
+**Panel JEC** is an operations dashboard for a Colombian educational program. It replaces manual spreadsheet reviews with a single web dashboard that consolidates attendance, lesson-planning, snack-delivery and teacher data stored across Google Sheets files in Google Drive, filtered by month and school.
 
-- **Core languages:** JavaScript, HTML5 and CSS3 (React and Tailwind CSS are used as supporting libraries for components and styling).
-- **Data layer:** the demo mode is powered by a small relational database of flat CSV files (`public/data/`) — schools, groups, teachers, students and an NL fact table — loaded and parsed by a hand-written CSV parser in plain JavaScript (`src/dataService.ts`), with in-memory caching. No data is hardcoded in the app logic.
-- **Backend:** Google Apps Script Web App exposing a JSON API over Drive/Sheets — no servers to maintain.
-- **Notable engineering:** batched processing to work around Apps Script's execution time limit, CORS-free `POST` requests using `text/plain` content type, `AbortController`-based timeouts and cancellation, real-time batch progress polling, Drive backup jobs resumed via Apps Script triggers, and Excel/CSV export.
-- **Demo mode:** the app runs with simulated data out of the box, so no private or minors' data is included in this repository — clone it, `npm install`, `npm run dev`, and explore.
+- **Stack:** TypeScript, React, Vite and Tailwind CSS on the frontend; a Google Apps Script Web App as a JSON API over Drive and Sheets, so there are no servers to maintain.
+- **Data layer:** demo mode runs on a small relational database of flat CSV files (`public/data/`): schools, groups, teachers, students and a fact table of attendance records. They are loaded by a hand-written CSV parser (`src/dataService.ts`) with in-memory caching, so no data is hardcoded in the app logic.
+- **Notable engineering:** batched processing to work around Apps Script's execution time limit, `AbortController`-based timeouts and cancellation, real-time progress polling, Drive backup jobs resumed through Apps Script triggers, and Excel/CSV export.
+- **Demo mode:** the app runs on simulated data out of the box, so no private data or data about minors is included in this repository. Clone it, run `npm install` and `npm run dev`, and explore.
+- **Built with AI assistance:** the code was developed mainly with Google AI Studio and Gemini.
