@@ -16,16 +16,11 @@ Lo que hace:
 - Historial de planeaciones y respaldos automáticos de listas en Google Drive
 - Exportación de cualquier reporte a Excel
 
-Cómo está construido:
-- Frontend: React 19 + TypeScript + Tailwind CSS, con Vite de build
-- Backend: Google Apps Script como API JSON sobre Google Sheets y Drive (sin servidores)
-- El dato que más me gusta contar: Apps Script corta las ejecuciones a los ~6 minutos, así que diseñé el procesamiento por lotes con reintentos, barra de progreso en tiempo real y cancelación manual desde la interfaz. También resolví el CORS de Apps Script usando peticiones POST con Content-Type text/plain (simple request, sin preflight).
+El dato que más me gusta contar: Apps Script corta las ejecuciones a los ~6 minutos, así que diseñé el procesamiento por lotes con reintentos, barra de progreso en tiempo real y cancelación manual desde la interfaz.
 
 El repositorio incluye un modo demo con datos simulados, para que cualquiera pueda ejecutarlo con `npm install && npm run dev` sin acceso a datos privados.
 
-Código y documentación completa: https://github.com/juandaramirez43/JEC-COLSUBSIDIO
-
-#React #TypeScript #GoogleAppsScript #DesarrolloWeb #Automatización #Portfolio
+Código y documentación completa: https://github.com/juandaramirez43/PANEL-JEC
 
 ---
 
